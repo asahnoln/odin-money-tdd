@@ -1,8 +1,8 @@
 package money
 
-// FIX: int type for value
+Rates :: [Currency][Currency]Decimal
 
-Rates :: map[Currency]map[Currency]int
+Decimal :: f64
 
 Currency :: enum {
 	USD,
@@ -10,7 +10,7 @@ Currency :: enum {
 }
 
 Money :: struct {
-	amount:   int,
+	amount:   Decimal,
 	currency: Currency,
 }
 
@@ -18,15 +18,22 @@ Sum :: struct {
 	augend, addend: Money,
 }
 
-reduce :: proc(rates: Rates, s: Sum, to: Currency) -> Money {
-	return Money{convert(rates, s.augend, to) + convert(rates, s.addend, to), to}
+reduce :: proc {
+	reduce_sum,
+	reduce_money,
 }
 
-convert :: proc(rates: Rates, m: Money, to: Currency) -> int {
-	reduced_val := m.amount
-	if (m.currency != to) {
-		reduced_val = m.amount / rates[to][m.currency]
+reduce_sum :: proc(rates: Rates, s: Sum, to: Currency) -> Money {
+	return Money {
+		amount = reduce(rates, s.augend, to).amount + reduce(rates, s.addend, to).amount,
+		currency = to,
+	}
+}
+
+reduce_money :: proc(rates: Rates, m: Money, to: Currency) -> Money {
+	if (m.currency == to) {
+		return m
 	}
 
-	return reduced_val
+	return Money{m.amount / rates[to][m.currency], to}
 }
